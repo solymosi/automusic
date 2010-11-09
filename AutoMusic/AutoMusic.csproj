@@ -167,6 +167,12 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Microsoft.DirectX.AudioVideoPlayback.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Microsoft.DirectX.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <Content Include="Resources\AutoMusic.ico" />
     <None Include="app.config" />
     <None Include="Resources\AutoMusicTray.ico" />

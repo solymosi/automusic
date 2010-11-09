@@ -88,7 +88,9 @@
             this.InfoLoadBW = new System.ComponentModel.BackgroundWorker();
             this.LoadPlaylistDialog = new System.Windows.Forms.OpenFileDialog();
             this.SavePlaylistDialog = new System.Windows.Forms.SaveFileDialog();
-            this.PlaylistGrid = new ReorderableListView();
+            this.AddFilesDialog = new System.Windows.Forms.OpenFileDialog();
+            this.AddFolderDialog = new System.Windows.Forms.FolderBrowserDialog();
+            this.PlaylistGrid = new AutoMusic.ReorderableListView();
             this.Played = new System.Windows.Forms.ColumnHeader();
             this.Title = new System.Windows.Forms.ColumnHeader();
             this.Duration = new System.Windows.Forms.ColumnHeader();
@@ -121,7 +123,7 @@
             this.mPlaylistClear});
             this.PlaylistMenu.Name = "PlaylistGridMenu";
             this.PlaylistMenu.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            this.PlaylistMenu.Size = new System.Drawing.Size(197, 320);
+            this.PlaylistMenu.Size = new System.Drawing.Size(197, 342);
             // 
             // mPlaylistSelectedTracks
             // 
@@ -211,6 +213,7 @@
             this.mPlaylistAddFiles.ShortcutKeyDisplayString = "Plus";
             this.mPlaylistAddFiles.Size = new System.Drawing.Size(196, 22);
             this.mPlaylistAddFiles.Text = "Add files...";
+            this.mPlaylistAddFiles.Click += new System.EventHandler(this.mPlaylistAddFiles_Click);
             // 
             // mPlaylistAddFolder
             // 
@@ -218,6 +221,7 @@
             this.mPlaylistAddFolder.ShortcutKeyDisplayString = "Shift+Plus";
             this.mPlaylistAddFolder.Size = new System.Drawing.Size(196, 22);
             this.mPlaylistAddFolder.Text = "Add folder...";
+            this.mPlaylistAddFolder.Click += new System.EventHandler(this.mPlaylistAddFolder_Click);
             // 
             // mPlaylistImport
             // 
@@ -225,6 +229,7 @@
             this.mPlaylistImport.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.I)));
             this.mPlaylistImport.Size = new System.Drawing.Size(196, 22);
             this.mPlaylistImport.Text = "Import playlist...";
+            this.mPlaylistImport.Click += new System.EventHandler(this.mPlaylistImport_Click);
             // 
             // sPlaylist5
             // 
@@ -654,13 +659,26 @@
             this.LoadPlaylistDialog.DefaultExt = "amp";
             this.LoadPlaylistDialog.Filter = "All supported files|*.amp;*.m3u|AutoMusic playlists|*.amp|M3U playlists|*.m3u|All" +
                 " files|*.*";
-            this.LoadPlaylistDialog.Title = "Load playlist";
             // 
             // SavePlaylistDialog
             // 
             this.SavePlaylistDialog.AddExtension = false;
             this.SavePlaylistDialog.Filter = "AutoMusic playlist|*.amp|M3U playlist|*.m3u|All files|*.*";
             this.SavePlaylistDialog.Title = "Save playlist";
+            // 
+            // AddFilesDialog
+            // 
+            this.AddFilesDialog.DefaultExt = "mp3";
+            this.AddFilesDialog.Filter = "All supported files|*.mp3;*.wma;*.wav|MP3 files|*.mp3|Windows Media files|*.wma|M" +
+                "icrosoft WAV files|*.wav|All files|*.*";
+            this.AddFilesDialog.Multiselect = true;
+            this.AddFilesDialog.Title = "Add files";
+            // 
+            // AddFolderDialog
+            // 
+            this.AddFolderDialog.Description = "Select a folder to add to the playlist. All supported files within the folder and" +
+                " its subfolders will be added.";
+            this.AddFolderDialog.ShowNewFolderButton = false;
             // 
             // PlaylistGrid
             // 
@@ -690,7 +708,7 @@
             this.PlaylistGrid.Resize += new System.EventHandler(this.PlaylistGrid_Resize);
             this.PlaylistGrid.SelectedIndexChanged += new System.EventHandler(this.PlaylistGrid_SelectedIndexChanged);
             this.PlaylistGrid.DragEnter += new System.Windows.Forms.DragEventHandler(this.PlaylistGrid_DragEnter);
-            this.PlaylistGrid.ItemsReordered += new ReorderableListView.ReorderDelegate(this.PlaylistGrid_ItemsReordered);
+            this.PlaylistGrid.ItemsReordered += new AutoMusic.ReorderableListView.ReorderDelegate(this.PlaylistGrid_ItemsReordered);
             // 
             // Played
             // 
@@ -801,6 +819,8 @@
         private System.Windows.Forms.ToolStripSeparator sPlaylist1;
         private System.Windows.Forms.OpenFileDialog LoadPlaylistDialog;
         private System.Windows.Forms.SaveFileDialog SavePlaylistDialog;
+        private System.Windows.Forms.OpenFileDialog AddFilesDialog;
+        private System.Windows.Forms.FolderBrowserDialog AddFolderDialog;
 
     }
 }

@@ -164,14 +164,14 @@ namespace AutoMusic
             get
             {
                 if (!Initialized) { return false; }
-                return (Sound.State == StateFlags.Running);
+                return (Sound.State == StateFlags.Running || Sound.State == StateFlags.Paused);
             }
         }
         public int Position
         {
             get
             {
-                if (!this.Running) { throw new InvalidOperationException("This player is not playing."); }
+                if (!this.Initialized) { throw new InvalidOperationException("This player is not initialized."); }
                 return (int)(Sound.CurrentPosition * (double)1000);
             }
         }
@@ -195,11 +195,14 @@ namespace AutoMusic
         }
         public void Initialize()
         {
-            try
-            {
+            //try
+            //{
                 Sound = new Audio(this.File, false);
-            }
-            catch { }
+            //}
+            //catch
+            //{
+            //    this.StopFinal(StopReason.Error);
+            //}
             this.ResetParameters();
         }
 

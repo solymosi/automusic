@@ -81,10 +81,6 @@ namespace AutoMusic
             UpdatePlaylistGrid();
             UpdateScheduleGrid();
             UpdatePlaylistMenu();
-            try { if (Playlist.Active.IsCurrent && Playlist.Active.Current.Running) { this.Text = Playlist.Active.Current.Sound.Volume.ToString() + " " + Playlist.Active.Current.RealVolume.ToString() + " " + Playlist.Active.Current.Volume.ToString(); } }
-            catch { }
-            try { if (Playlist.Active.IsCurrent && Playlist.Active.Current.Running) { this.Text = Playlist.Active.Current.Position.ToString() + " " + Playlist.Active.Current.Length.ToString() + " " + Playlist.Active.Current.Sound.CurrentPosition.ToString() + " " + Playlist.Active.Current.Sound.Duration.ToString(); } }
-            catch { }
         }
         private void UpdatePlaylistGrid()
         {
@@ -642,6 +638,7 @@ namespace AutoMusic
         private void mPlaylistLoad_Click(object sender, EventArgs e)
         {
             if (!Playlist.Active.Saved && !Playlist.Active.Empty && Tools.Question("Current playlist is not saved. Discard it and load another one?", MessageBoxIcon.Exclamation) == DialogResult.No) { return; }
+            LoadPlaylistDialog.Title = "Load Playlist";
             if (LoadPlaylistDialog.ShowDialog() == DialogResult.OK)
             {
                 try
@@ -685,6 +682,45 @@ namespace AutoMusic
                     UpdateAll();
                 }
                 catch { Tools.Message("Could not save playlist. Check that you have permission to save to the selected location!", MessageBoxIcon.Error); }
+            }
+        }
+
+        private void mPlaylistAddFiles_Click(object sender, EventArgs e)
+        {
+            if (AddFilesDialog.ShowDialog() == DialogResult.OK)
+            {
+                List<Track> Tracks = new List<Track>();
+                foreach (string File in AddFilesDialog.FileNames)
+                {
+                    Tracks.Add(new Track(File));
+                }
+                Playlist.Active.AddRange(Tracks);
+                UpdateAll();
+            }
+        }
+
+        private void mPlaylistAddFolder_Click(object sender, EventArgs e)
+        {
+            if (AddFolderDialog.ShowDialog() == DialogResult.OK)
+            {
+                MessageBox.Show(AddFolderDialog.SelectedPath);
+                UpdateAll();
+            }
+        }
+
+        private void mPlaylistImport_Click(object sender, EventArgs e)
+        {
+            LoadPlaylistDialog.Title = "Import Playlist";
+            if (LoadPlaylistDialog.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    Playlist NewList = Playlist.Load(LoadPlaylistDialog.FileName);
+                    Playlist.Active.AddRange(NewList.Tracks);
+                    UpdateAll();
+                }
+                catch (FormatException) { Tools.Message("Could not load " + LoadPlaylistDialog.FileName + ": the file format cannot be recognized.", MessageBoxIcon.Error); }
+                catch { Tools.Message("Could not load " + LoadPlaylistDialog.FileName + ": error opening the file.", MessageBoxIcon.Error); }
             }
         }
     }
