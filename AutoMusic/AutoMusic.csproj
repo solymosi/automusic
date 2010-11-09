@@ -87,6 +87,8 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.DirectX, Version=1.0.2902.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
+    <Reference Include="Microsoft.DirectX.AudioVideoPlayback, Version=1.0.2902.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
@@ -96,10 +98,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Context.cs" />
-    <Compile Include="FMOD\fmod.cs" />
-    <Compile Include="FMOD\fmod_dsp.cs" />
-    <Compile Include="FMOD\fmod_errors.cs" />
-    <Compile Include="FMOD\fmod_memoryinfo.cs" />
     <Compile Include="Global.cs" />
     <Compile Include="ReorderableListView.cs">
       <SubType>Component</SubType>
@@ -112,7 +110,6 @@
     </Compile>
     <Compile Include="Playlist.cs" />
     <Compile Include="Schedule.cs" />
-    <Compile Include="SoundSystem.cs" />
     <Compile Include="Time.cs" />
     <Compile Include="Timer.cs" />
     <Compile Include="Player.cs" />
@@ -171,7 +168,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\AutoMusic.ico" />
-    <Content Include="fmodex.dll" />
     <None Include="app.config" />
     <None Include="Resources\AutoMusicTray.ico" />
     <None Include="Resources\Volume.png" />

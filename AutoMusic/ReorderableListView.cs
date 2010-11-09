@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 using AutoMusic;
 
-namespace System.Windows.Forms
+namespace AutoMusic
 {
     public class ReorderableListView : ListView
     {

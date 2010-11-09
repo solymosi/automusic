@@ -81,6 +81,10 @@ namespace AutoMusic
             UpdatePlaylistGrid();
             UpdateScheduleGrid();
             UpdatePlaylistMenu();
+            try { if (Playlist.Active.IsCurrent && Playlist.Active.Current.Running) { this.Text = Playlist.Active.Current.Sound.Volume.ToString() + " " + Playlist.Active.Current.RealVolume.ToString() + " " + Playlist.Active.Current.Volume.ToString(); } }
+            catch { }
+            try { if (Playlist.Active.IsCurrent && Playlist.Active.Current.Running) { this.Text = Playlist.Active.Current.Position.ToString() + " " + Playlist.Active.Current.Length.ToString() + " " + Playlist.Active.Current.Sound.CurrentPosition.ToString() + " " + Playlist.Active.Current.Sound.Duration.ToString(); } }
+            catch { }
         }
         private void UpdatePlaylistGrid()
         {
@@ -93,8 +97,8 @@ namespace AutoMusic
             {
                 Track Current = Playlist.Active.Tracks[i];
                 TrackState State = Current.State;
-                string Name = Path.GetFileName(Current.Stream);
-                uint Length = 0;
+                string Name = Path.GetFileName(Current.File);
+                int Length = 0;
                 if (Current.InfoAvailable)
                 {
                     Name = Current.Name;
@@ -105,7 +109,7 @@ namespace AutoMusic
                     if (!InfoLoadBW.IsBusy) { InfoLoadBW.RunWorkerAsync(); }
                 }
                 bool Running = Current.Running;
-                uint Position = 0;
+                int Position = 0;
                 if(Running) { Position = Current.Position; }
                 string Duration = "";
                 if(Running) { Duration = Time.Format(Position) + " / " + Time.Format(Length); }
@@ -368,7 +372,7 @@ namespace AutoMusic
         {
             if (Playlist.Active.IsCurrent && Playlist.Active.Current.Running)
             {
-                uint TargetPosition = (uint)Math.Round((double)((double)e.X / (double)SeekBar.Width) * (double)Playlist.Active.Current.Length);
+                int TargetPosition = (int)Math.Round((double)((double)e.X / (double)SeekBar.Width) * (double)Playlist.Active.Current.Length);
                 Playlist.Active.Current.Seek(TargetPosition);
                 this.UpdateBars();
             }
@@ -377,7 +381,7 @@ namespace AutoMusic
         {
             if (Playlist.Active.IsCurrent && Playlist.Active.Current.Running)
             {
-                uint TargetPosition = (uint)Math.Round((double)((double)e.X / (double)SeekBar.Width) * (double)Playlist.Active.Current.Length);
+                int TargetPosition = (int)Math.Round((double)((double)e.X / (double)SeekBar.Width) * (double)Playlist.Active.Current.Length);
                 this.SetStatus("Seek to " + Time.Format(TargetPosition));
             }
         }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using Multimedia;
+using Microsoft.DirectX.AudioVideoPlayback;
 
 namespace AutoMusic
 {
@@ -53,14 +54,13 @@ namespace AutoMusic
         /// </summary>
         public event PanChangeDelegate PanChanged = delegate { };
 
-        protected FMOD.Channel FMODChannel = null;
-        protected FMOD.Sound FMODSound = null;
+        public Audio Sound = null;
 
         Timer PlayTimer;
 
         // Player settings
-        string _Stream = "";
-        public string Stream { get { return this._Stream; } }
+        string _File = "";
+        public string File { get { return this._File; } }
         int _Volume = 1000;
         public int Volume
         {
@@ -77,17 +77,17 @@ namespace AutoMusic
         {
             get
             {
-                float Volume = 0F;
-                if(this.Initialized) { HandleError(this.FMODChannel.getVolume(ref Volume), true); }
-                return Convert.ToInt32(Volume * 1000.0F);
+                if (this.Initialized) { return (int)Math.Round(Math.Pow((double)10, (double)((double)(9999 + Sound.Volume) / (double)3333))); }
+                return 0;
             }
             protected set { this.SetVolume(value); }
         }
         protected void SetVolume() { this.SetVolume(this.Volume); }
         protected void SetVolume(int Volume)
         {
-            if (this.Initialized) { HandleError(this.FMODChannel.setVolume((float)Volume / 1000F), true); }
+            if (this.Initialized) { Sound.Volume = -9999 + (int)(Math.Round((double)3333 * Math.Log10((double)(Volume == 0 ? 1 : Volume)))); }
         }
+
         int _Pan = 0;
         public int Pan
         {
@@ -104,16 +104,15 @@ namespace AutoMusic
         {
             get
             {
-                float Pan = 0.0F;
-                if (this.Initialized) { this.FMODChannel.getPan(ref Pan); }
-                return Convert.ToInt32(Pan * 1000.0F);
+                if (this.Initialized) { return Sound.Balance / 10; }
+                return 0;
             }
             protected set { this.SetPan(value); }
         }
         protected void SetPan() { SetPan(this.Pan); }
         protected void SetPan(int Pan)
         {
-            if (this.Initialized) { HandleError(this.FMODChannel.setPan((float)Pan / 1000F), true); }
+            if (this.Initialized) { Sound.Balance = Pan * 10; }
         }
 
         // Fade state and options
@@ -124,22 +123,14 @@ namespace AutoMusic
         protected bool CanFade { get { return this.Running; } }
 
         // Player state
-        protected bool _Aborting = false;
         protected bool _NextCalled = false;
         protected bool _EndDone = false;
 
         /// <summary>
-        /// Returns true if FMOD is initialized
+        /// Returns true if the sound instance is initialized
         /// </summary>
-        public bool Initialized
-        {
-            get
-            {
-                try { return (SoundSystem.Initialized && this.FMODChannel != null && this.FMODSound != null); }
-                catch { return false; }
-            }
-        }
-        
+        public bool Initialized { get { return Sound != null && !Sound.Disposed; } }
+
         /// <summary>
         /// Returns true if the player is paused.
         /// </summary>
@@ -147,9 +138,8 @@ namespace AutoMusic
         {
             get
             {
-                bool Paused = false;
                 if (!Initialized) { return false; }
-                FMODChannel.getPaused(ref Paused);
+                bool Paused = (Sound.State == StateFlags.Paused);
                 if (!Paused && Fading && this._Fade.Type == FadeType.Pause) { return true; }
                 return Paused;
             }
@@ -173,34 +163,27 @@ namespace AutoMusic
         {
             get
             {
-                bool Running = false;
                 if (!Initialized) { return false; }
-                try { FMODChannel.isPlaying(ref Running); }
-                catch { return false; }
-                return Running;
+                return (Sound.State == StateFlags.Running);
             }
         }
-        public uint Position
+        public int Position
         {
             get
             {
-                uint Position = 0;
                 if (!this.Running) { throw new InvalidOperationException("This player is not playing."); }
-                HandleError(this.FMODChannel.getPosition(ref Position, FMOD.TIMEUNIT.MS), true);
-                return Position;
+                return (int)(Sound.CurrentPosition * (double)1000);
             }
         }
-        public uint Length
+        public int Length
         {
             get
             {
-                uint Length = 0;
                 if (!this.Initialized) { throw new InvalidOperationException("This player is not initialized."); }
-                HandleError(this.FMODSound.getLength(ref Length, FMOD.TIMEUNIT.MS), true);
-                return Length;
+                return (int)(Sound.Duration * (double)1000);
             }
         }
-        public uint Remaining { get { return this.Length - this.Position; } }
+        public int Remaining { get { return this.Length - this.Position; } }
 
         /// <summary>
         /// Creates a new player instance
@@ -208,43 +191,40 @@ namespace AutoMusic
         /// <param name="Stream">Path of the file to load</param>
         public Player(string Stream)
         {
-            this._Stream = Stream;
+            this._File = Stream;
         }
         public void Initialize()
         {
-            if (!SoundSystem.Initialized) { SoundSystem.Initialize(); }
             try
             {
-                HandleError(SoundSystem.Active.createStream(this._Stream, FMOD.MODE.LOOP_OFF, ref this.FMODSound), true);
-                HandleError(SoundSystem.Active.playSound(FMOD.CHANNELINDEX.REUSE, this.FMODSound, true, ref this.FMODChannel), true);
+                Sound = new Audio(this.File, false);
             }
             catch { }
             this.ResetParameters();
         }
+
         void Tick(object sender, EventArgs e)
         {
             if (!this.Initialized) { return; }
-            try
+            if (this.Position >= this.Length)
             {
-                SoundSystem.Update();
+                Sound_Ending(this, new EventArgs());
             }
-            catch { this.FMODCallback((IntPtr)null, FMOD.CHANNEL_CALLBACKTYPE.END, (IntPtr)null, (IntPtr)null); }
             if (this.Fading) { this._Fade.Tick(); }
             Fade.SpawnCheck(this);
         }
-        FMOD.RESULT FMODCallback(IntPtr FMODSystem, FMOD.CHANNEL_CALLBACKTYPE Type, IntPtr Data1, IntPtr Data2)
+
+        void Sound_Ending(object sender, EventArgs e)
         {
-            if (this._EndDone || this._Aborting) { return FMOD.RESULT.OK; }
-            if (Type != FMOD.CHANNEL_CALLBACKTYPE.END) { return FMOD.RESULT.OK; }
+            if (this._EndDone) { return; }
+            this._EndDone = true;
             if (!this._NextCalled) { this.CallNext(); }
             if (this.FinalFading)
             {
                 this._Fade.Finish();
-                return FMOD.RESULT.OK;
+                return;
             }
             this.StopFinal(StopReason.Finished);
-            this._EndDone = true;
-            return FMOD.RESULT.OK;
         }
 
         // Player actions
@@ -252,14 +232,13 @@ namespace AutoMusic
         {
             if (!this.Initialized) { this.Initialize(); }
             if (!this.Initialized) { this.CallNext(); return; }
-            HandleError(this.FMODChannel.setCallback(new FMOD.CHANNEL_CALLBACK(FMODCallback)), true);
-            HandleError(this.FMODChannel.setPaused(false), true);
             this.PlayTimer = new Multimedia.Timer();
             this.PlayTimer.Resolution = 1;
             this.PlayTimer.Tick += new EventHandler(Tick);
             this.PlayTimer.Start();
-            this.SetVolume(); this.SetPan();
-            int FMODFix = this.RealVolume;
+            this.SetVolume();
+            this.SetPan();
+            Sound.Play();
             PlayStarted(this, new EventArgs());
         }
         public void Stop() { this.Stop(StopReason.Aborted); }
@@ -268,28 +247,16 @@ namespace AutoMusic
             if (!this.Initialized) { return; }
             this._Fade = new FinalFade(this, FinalFade.DefaultStopLength, FadeType.Stop);
         }
-        protected void StopFinal(StopReason Reason) 
+        protected void StopFinal(StopReason Reason)
         {
-            this._Aborting = true;
             this.Finish();
             PlayStopped(this, new StopEventArgs(Reason));
         }
         protected void Finish()
         {
             this.ClearFade();
-            if (this.FMODChannel != null)
-            {
-                try { this.FMODChannel.stop(); }
-                catch { }
-            }
-            if (this.FMODSound != null)
-            {
-                try { this.FMODSound.release(); }
-                catch { }
-            }
+            Sound = null;
             this.PlayTimer = null;
-            this.FMODChannel = null;
-            this.FMODSound = null;
             this.ResetParameters();
         }
         public void Pause()
@@ -301,20 +268,20 @@ namespace AutoMusic
         protected void PauseFinal()
         {
             if (!this.Playing) { return; }
-            HandleError(this.FMODChannel.setPaused(true), true);
+            Sound.Pause();
         }
         public void Resume()
         {
             if (!this.Initialized || !this.Paused) { return; }
             this.RealVolume = 0;
-            HandleError(this.FMODChannel.setPaused(false), true);
+            Sound.Play();
             this.SetFade(this, this.Volume, Fade.DefaultResumeLength, FadeType.Resume);
             PlayPaused(this, new PauseEventArgs(false));
         }
-        public void Seek(uint Position)
+        public void Seek(int Position)
         {
             if (!this.Playing) { return; }
-            HandleError(this.FMODChannel.setPosition(Position, FMOD.TIMEUNIT.MS), true);
+            Sound.SeekCurrentPosition((double)((double)Position * (double)10000), SeekPositionFlags.AbsolutePositioning);
             this.ResetParameters();
             this.Seeking(this, new SeekEventArgs(this.Position));
         }
@@ -346,19 +313,6 @@ namespace AutoMusic
             this.RealPan = this.Pan;
             this._NextCalled = false;
             this._EndDone = false;
-            this._Aborting = false;
-        }
-        void HandleError(FMOD.RESULT FMODResult, bool Abort)
-        {
-            try { SoundSystem.HandleError(FMODResult); }
-            catch (FMODException FMODException)
-            {
-                if (Abort)
-                {
-                    this.StopFinal(StopReason.Error);
-                }
-                this.Error(this, new ErrorEventArgs(FMODException));
-            }
         }
 
 
@@ -366,16 +320,16 @@ namespace AutoMusic
         {
             protected Player _Player;
             protected FadeState _State = FadeState.None;
-            protected uint _StartPosition = 0;
-            protected uint _EndPosition = 0;
+            protected int _StartPosition = 0;
+            protected int _EndPosition = 0;
             protected int _StartVolume = 0;
             protected int _EndVolume = 0;
             protected FadeType _Type;
 
             public Player Player { get { return this._Player; } }
             public FadeState State { get { return this._State; } }
-            public uint StartPosition { get { return this._StartPosition; } }
-            public uint EndPosition { get { return this._EndPosition; } }
+            public int StartPosition { get { return this._StartPosition; } }
+            public int EndPosition { get { return this._EndPosition; } }
             public int StartVolume { get { return this._StartVolume; } }
             public int EndVolume { get { return this._EndVolume; } }
             public FadeType Type { get { return this._Type; } }
@@ -395,9 +349,9 @@ namespace AutoMusic
                     return;
                 }
                 this._Player = Player;
-                uint Position = Player.Position;
+                int Position = Player.Position;
                 this._StartPosition = Position;
-                this._EndPosition = Position + (uint)Length;
+                this._EndPosition = Position + (int)Length;
                 this._StartVolume = Player.RealVolume;
                 this._EndVolume = TargetVolume;
                 this._Type = Type;
@@ -407,8 +361,8 @@ namespace AutoMusic
             public virtual void Tick()
             {
                 if (!this.CanFade || !Fade.Enabled) { return; }
-                uint Position = this.Player.Position;
-                uint Length = this.Player.Length;
+                int Position = this.Player.Position;
+                int Length = this.Player.Length;
                 this.Player.RealVolume = this.StartVolume + (int)((double)(Position - this.StartPosition) / (double)(this.EndPosition - this.StartPosition) * (double)(this.EndVolume - this.StartVolume));
                 if (Position >= this.EndPosition)
                 {
@@ -420,14 +374,13 @@ namespace AutoMusic
                 if (!this.CanFade) { return; }
                 Player.RealVolume = this._EndVolume;
                 Player.ClearFade();
-                GC.Collect();
-                if(this.Type == FadeType.Pause) { Player.PauseFinal(); }
+                if (this.Type == FadeType.Pause) { Player.PauseFinal(); }
             }
             public static void SpawnCheck(Player Player)
             {
                 if (!Player.CanFade || !Fade.Enabled) { return; }
-                uint Position = Player.Position;
-                uint Length = Player.Length;
+                int Position = Player.Position;
+                int Length = Player.Length;
                 if (!Player.FinalFading && Position >= Length - FinalFade.DefaultEndLength && Length > FinalFade.DefaultEndLength * 4)
                 {
                     Player.SetFinalFade(Player, FinalFade.DefaultEndLength, FadeType.End);
@@ -455,8 +408,8 @@ namespace AutoMusic
             {
                 base.Tick();
                 if (!this.CanFade || !Fade.Enabled) { return; }
-                uint Position = Player.Position;
-                uint Length = Player.Length;
+                int Position = Player.Position;
+                int Length = Player.Length;
                 if ((this.Type == FadeType.Next || this.Type == FadeType.End) && !Player._NextCalled && Position >= this.EndPosition - (this.Type == FadeType.Next ? NextOverlap : EndOverlap))
                 {
                     Player.CallNext();
@@ -484,15 +437,6 @@ namespace AutoMusic
             End
         }
 
-        public class ErrorEventArgs : EventArgs
-        {
-            public FMODException Exception;
-            public ErrorEventArgs(FMODException Exception)
-                : base()
-            {
-                this.Exception = Exception;
-            }
-        }
         public class PauseEventArgs : EventArgs
         {
             public bool Paused;
@@ -513,8 +457,8 @@ namespace AutoMusic
         }
         public class SeekEventArgs : EventArgs
         {
-            public uint Position;
-            public SeekEventArgs(uint Position)
+            public int Position;
+            public SeekEventArgs(int Position)
                 : base()
             {
                 this.Position = Position;
@@ -541,15 +485,5 @@ namespace AutoMusic
 
         public enum StopReason { Finished, Aborted, Error }
 
-    }
-
-    public class FMODException : Exception
-    {
-        public FMOD.RESULT FMODResult;
-        public FMODException(FMOD.RESULT FMODResult)
-            : base(FMOD.Error.String(FMODResult))
-        {
-            this.FMODResult = FMODResult;
-        }
     }
 }

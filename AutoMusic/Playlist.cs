@@ -14,7 +14,7 @@ namespace AutoMusic
         public delegate void SeekDelegate(object sender, Player.SeekEventArgs e);
         public delegate void FadeDelegate(object sender, EventArgs e);
         public delegate void NextDelegate(object sender, EventArgs e);
-        public delegate void ErrorDelegate(object sender, Player.ErrorEventArgs e);
+        public delegate void ErrorDelegate(object sender, EventArgs e);
         public delegate void StateChangeDelegate(object sender, EventArgs e);
 
         public event CurrentChangeDelegate CurrentTrackChanged = delegate { };
@@ -96,6 +96,7 @@ namespace AutoMusic
         public Playlist()
         {
             this._Tracks = new List<Track>();
+            this.Volume = Global.Volume;
         }
 
         public void Play()
@@ -214,7 +215,7 @@ namespace AutoMusic
         {
             this.FadeStarted(sender, e);
         }
-        void Track_Error(object sender, Player.ErrorEventArgs e)
+        void Track_Error(object sender, EventArgs e)
         {
             this.Error(sender, e);
         }

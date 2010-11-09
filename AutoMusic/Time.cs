@@ -52,7 +52,7 @@ namespace AutoMusic
             catch { throw new FormatException("The time format is invalid."); }
         }
         static public DateTime Corrected { get { return DateTime.Now.AddSeconds((double)TimeOffset); } }
-        static public string Format(uint Milliseconds)
+        static public string Format(int Milliseconds)
         {
             TimeSpan D = new TimeSpan(0, 0, 0, 0, (int)Milliseconds);
             return D.Minutes.ToString() + ":" + D.Seconds.ToString("00");

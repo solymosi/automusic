@@ -21,15 +21,6 @@ namespace AutoMusic
                 Tools.Message("AutoMusic can only run from a trusted location. Check the Properties panel and make sure it is on a local drive and is not being blocked!", MessageBoxIcon.Error);
                 return;
             }
-            try
-            {
-                if (!File.Exists(FMOD.VERSION.dll + ".dll")) { throw new FileNotFoundException(); }
-            }
-            catch
-            {
-                Tools.Message("Could not load the FMOD sound system. Make sure that " + FMOD.VERSION.dll + ".dll is present on your system!", MessageBoxIcon.Error);
-                return;
-            }
             Global.Context = new Context(CommandLine);
             //try
             //{

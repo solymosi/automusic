@@ -28,8 +28,8 @@ namespace AutoMusic
         // Track information
         bool _InfoAvailable = false;
         public bool InfoAvailable { get { return this._InfoAvailable; } }
-        uint _Length = 0;
-        public new uint Length { get { if (!this._InfoAvailable) { this.LoadInfo(); } return this._Length; } }
+        int _Length = 0;
+        public new int Length { get { if (!this._InfoAvailable) { this.LoadInfo(); } return this._Length; } }
         string _Artist = "";
         public string Artist { get { if (!this._InfoAvailable) { this.LoadInfo(); } return this._Artist; } }
         string _Title = "";
@@ -38,7 +38,7 @@ namespace AutoMusic
         {
             get
             {
-                if (Title == "") { return Path.GetFileName(this.Stream); }
+                if (Title == "") { return Path.GetFileName(this.File); }
                 return (Artist == "" ? Title : Artist + " - " + Title);
             }
         }
@@ -86,7 +86,7 @@ namespace AutoMusic
         {
             this.StateChanged(this, new EventArgs());
         }
-        void Track_Error(object sender, Player.ErrorEventArgs e)
+        void Track_Error(object sender, EventArgs e)
         {
             this.StateChanged(this, new EventArgs());
         }
@@ -106,26 +106,31 @@ namespace AutoMusic
             if (!this.Initialized) { this.Initialize(); }
             if (this.State != TrackState.Error)
             {
-                this._Length = base.Length;
-                this._Artist = this.GetTag("Artist").Trim();
-                this._Title = this.GetTag("Title").Trim();
+                try
+                {
+                    this._Length = base.Length;
+                    this._Artist = this.GetTag("Artist").Trim();
+                    this._Title = this.GetTag("Title").Trim();
+                    this._InfoAvailable = true;
+                }
+                catch { }
             }
             if (Finish) { this.Finish(); }
-            this._InfoAvailable = true;
         }
         string GetTag(string Name)
         {
             try
             {
-                FMOD.TAG TagData = new FMOD.TAG();
+                /*FMOD.TAG TagData = new FMOD.TAG();
                 this.FMODSound.getTag(Name.ToUpper(), 0, ref TagData);
-                return Marshal.PtrToStringAnsi(TagData.data);
+                return Marshal.PtrToStringAnsi(TagData.data);*/
+                return "";
             }
             catch { return ""; }
         }
         public Track Duplicate()
         {
-            return new Track(this.Stream);
+            return new Track(this.File);
         }
         public void Reset()
         {
@@ -157,9 +162,9 @@ namespace AutoMusic
                         case TrackState.Error: State = "E"; break;
                         default: State = "E"; break;
                     }
-                    return State + " " + this.Stream;
+                    return State + " " + this.File;
                 case PlaylistFormat.M3U:
-                    return "#EXTINF:" + (this._InfoAvailable ? this.Length.ToString() : "0") + "," + (this._InfoAvailable ? this.Name : Path.GetFileNameWithoutExtension(this.Stream)) + "\n" + this.Stream;
+                    return "#EXTINF:" + (this._InfoAvailable ? this.Length.ToString() : "0") + "," + (this._InfoAvailable ? this.Name : Path.GetFileNameWithoutExtension(this.File)) + "\n" + this.File;
 
             }
             throw new ArgumentException("The specified playlist format is not supported.");

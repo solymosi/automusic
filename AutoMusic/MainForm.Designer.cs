@@ -88,7 +88,7 @@
             this.InfoLoadBW = new System.ComponentModel.BackgroundWorker();
             this.LoadPlaylistDialog = new System.Windows.Forms.OpenFileDialog();
             this.SavePlaylistDialog = new System.Windows.Forms.SaveFileDialog();
-            this.PlaylistGrid = new System.Windows.Forms.ReorderableListView();
+            this.PlaylistGrid = new ReorderableListView();
             this.Played = new System.Windows.Forms.ColumnHeader();
             this.Title = new System.Windows.Forms.ColumnHeader();
             this.Duration = new System.Windows.Forms.ColumnHeader();
@@ -690,7 +690,7 @@
             this.PlaylistGrid.Resize += new System.EventHandler(this.PlaylistGrid_Resize);
             this.PlaylistGrid.SelectedIndexChanged += new System.EventHandler(this.PlaylistGrid_SelectedIndexChanged);
             this.PlaylistGrid.DragEnter += new System.Windows.Forms.DragEventHandler(this.PlaylistGrid_DragEnter);
-            this.PlaylistGrid.ItemsReordered += new System.Windows.Forms.ReorderableListView.ReorderDelegate(this.PlaylistGrid_ItemsReordered);
+            this.PlaylistGrid.ItemsReordered += new ReorderableListView.ReorderDelegate(this.PlaylistGrid_ItemsReordered);
             // 
             // Played
             // 
@@ -793,7 +793,7 @@
         private System.Windows.Forms.Label StatusBar;
         private System.Windows.Forms.ToolStripMenuItem mPlaylistExclude;
         private System.Windows.Forms.Label SeekBarFill;
-        private System.Windows.Forms.ReorderableListView PlaylistGrid;
+        private ReorderableListView PlaylistGrid;
         private System.Windows.Forms.Label VolumeBarFill;
         private System.Windows.Forms.Label VolumeBarMax;
         private System.ComponentModel.BackgroundWorker InfoLoadBW;
