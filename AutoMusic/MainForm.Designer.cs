@@ -250,6 +250,7 @@
             this.mPlaylistClear.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Shift | System.Windows.Forms.Keys.Delete)));
             this.mPlaylistClear.Size = new System.Drawing.Size(196, 22);
             this.mPlaylistClear.Text = "Clear list";
+            this.mPlaylistClear.Click += new System.EventHandler(this.mPlaylistClear_Click);
             // 
             // mScheduleRemove
             // 

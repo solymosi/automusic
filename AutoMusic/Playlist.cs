@@ -155,6 +155,16 @@ namespace AutoMusic
             this.DetachEventHandlers(Track);
             this.Tracks.Remove(Track);
         }
+        public void Clear()
+        {
+            List<Track> Tracks = new List<Track>();
+            Tracks.AddRange(this._Tracks);
+            foreach (Track Track in Tracks)
+            {
+                this.Remove(Track);
+            }
+            this.Current = null;
+        }
         public void Duplicate(Track Track)
         {
             this.Add(Track.Duplicate());

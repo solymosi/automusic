@@ -746,6 +746,15 @@ namespace AutoMusic
                     Track.Reset();
                 }
             }
+            UpdateAll();
+        }
+
+        private void mPlaylistClear_Click(object sender, EventArgs e)
+        {
+            if (Tools.Question("This will remove all tracks from this playlist. Do you want to continue?", MessageBoxIcon.Exclamation) == DialogResult.No) { return; }
+            if (Playlist.Active.IsCurrent) { Playlist.Active.Current.Stop(); }
+            Playlist.Active.Clear();
+            UpdateAll();
         }
     }
 }
