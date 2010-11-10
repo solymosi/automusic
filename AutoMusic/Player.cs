@@ -261,6 +261,7 @@ namespace AutoMusic
             Sound = null;
             this.PlayTimer = null;
             this.ResetParameters();
+            GC.Collect();
         }
         public void Pause()
         {
@@ -393,11 +394,11 @@ namespace AutoMusic
 
         public class FinalFade : Fade
         {
-            static public int DefaultStopLength = 5000;
-            static public int DefaultNextLength = 5000;
-            static public int DefaultEndLength = 8000;
-            static public int NextOverlap = 3000;
-            static public int EndOverlap = 5000;
+            static public int DefaultStopLength = 8000;
+            static public int DefaultNextLength = 8000;
+            static public int DefaultEndLength = 15000;
+            static public int NextOverlap = 5000;
+            static public int EndOverlap = 10000;
 
             public FinalFade(Player Player, int Length, FadeType Type)
                 : base(Player, 0, Length, Type)

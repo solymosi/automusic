@@ -703,8 +703,20 @@ namespace AutoMusic
         {
             if (AddFolderDialog.ShowDialog() == DialogResult.OK)
             {
-                MessageBox.Show(AddFolderDialog.SelectedPath);
-                UpdateAll();
+                try
+                {
+                    List<Track> Tracks = new List<Track>();
+                    foreach (string Pattern in new string[] { "*.mp3", "*.wma", "*.wav" })
+                    {
+                        foreach (string File in Directory.GetFiles(AddFolderDialog.SelectedPath, Pattern, SearchOption.AllDirectories))
+                        {
+                            Tracks.Add(new Track(File));
+                        }
+                    }
+                    Playlist.Active.AddRange(Tracks);
+                    UpdateAll();
+                }
+                catch { Tools.Message("Could not search for files in " + AddFolderDialog.SelectedPath + ": error opening the folder", MessageBoxIcon.Error); }
             }
         }
 
@@ -721,6 +733,18 @@ namespace AutoMusic
                 }
                 catch (FormatException) { Tools.Message("Could not load " + LoadPlaylistDialog.FileName + ": the file format cannot be recognized.", MessageBoxIcon.Error); }
                 catch { Tools.Message("Could not load " + LoadPlaylistDialog.FileName + ": error opening the file.", MessageBoxIcon.Error); }
+            }
+        }
+
+        private void mPlaylistReset_Click(object sender, EventArgs e)
+        {
+            if (Tools.Question("This will re-queue every track in this playlist regardless of its status. Do you want to continue?", MessageBoxIcon.Exclamation) == DialogResult.No) { return; }
+            foreach (Track Track in Playlist.Active.Tracks)
+            {
+                if (!Track.Running)
+                {
+                    Track.Reset();
+                }
             }
         }
     }

@@ -242,6 +242,7 @@
             this.mPlaylistReset.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.R)));
             this.mPlaylistReset.Size = new System.Drawing.Size(196, 22);
             this.mPlaylistReset.Text = "Reset list";
+            this.mPlaylistReset.Click += new System.EventHandler(this.mPlaylistReset_Click);
             // 
             // mPlaylistClear
             // 
