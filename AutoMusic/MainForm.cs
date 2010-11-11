@@ -871,12 +871,32 @@ namespace AutoMusic
 
         private void mScheduleAdd_Click(object sender, EventArgs e)
         {
-
+            RuleForm Form = new RuleForm();
+            Form.SetFields(false, false, new Time(0, 0), new Time(0, 0));
+            if (Form.ShowDialog() == DialogResult.OK)
+            {
+                TimeFrame Frame = new TimeFrame(new Time((int)Form.FirstHour.Value, (int)Form.FirstMinute.Value), new Time((int)Form.SecondHour.Value, (int)Form.SecondMinute.Value), Form.Disallow.Checked);
+                Schedule.Active.Add(Frame);
+                ScheduleGrid.SelectedItems.Clear();
+                SaveSchedule();
+                UpdateAll();
+            }
         }
 
         private void mScheduleEdit_Click(object sender, EventArgs e)
         {
-
+            TimeFrame Frame = (TimeFrame)ScheduleGrid.SelectedItems[0].Tag;
+            RuleForm Form = new RuleForm();
+            Form.SetFields(true, Frame.Exclusion, Frame.From, Frame.To);
+            if (Form.ShowDialog() == DialogResult.OK)
+            {
+                Frame.From = new Time((int)Form.FirstHour.Value, (int)Form.FirstMinute.Value);
+                Frame.To = new Time((int)Form.SecondHour.Value, (int)Form.SecondMinute.Value);
+                Frame.Exclusion = Form.Disallow.Checked;
+                ScheduleGrid.SelectedItems.Clear();
+                SaveSchedule();
+                UpdateAll();
+            }
         }
 
         private void mScheduleDuplicate_Click(object sender, EventArgs e)
@@ -899,7 +919,7 @@ namespace AutoMusic
             SyncForm Form = new SyncForm();
             if (Form.ShowDialog() == DialogResult.OK)
             {
-                DateTime Now = new DateTime(Time.Corrected.Year, Time.Corrected.Month, Time.Corrected.Day, (int)((NumericUpDown)Form.Controls["Hour"]).Value, (int)((NumericUpDown)Form.Controls["Minute"]).Value, (int)((NumericUpDown)Form.Controls["Second"]).Value);
+                DateTime Now = new DateTime(Time.Corrected.Year, Time.Corrected.Month, Time.Corrected.Day, (int)Form.Hour.Value, (int)Form.Minute.Value, (int)Form.Second.Value);
                 Time.CorrectTo(Now);
                 if (Time.TimeOffset == 0)
                 {

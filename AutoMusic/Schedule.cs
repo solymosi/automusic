@@ -95,8 +95,8 @@ namespace AutoMusic
 
         static public new Schedule Active;
 
-        static public int StartAfter = 10;
-        static public int StopBefore = 10;
+        static public int StartAfter = 20;
+        static public int StopBefore = 20;
 
         static public bool Enabled
         {

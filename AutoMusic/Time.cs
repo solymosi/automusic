@@ -2,7 +2,7 @@
 
 namespace AutoMusic
 {
-    class Time
+    public class Time
     {
         int _Hour;
         int _Minute;
@@ -63,7 +63,7 @@ namespace AutoMusic
         }
     }
 
-    class TimeFrame
+    public class TimeFrame
     {
         Time _From;
         Time _To;

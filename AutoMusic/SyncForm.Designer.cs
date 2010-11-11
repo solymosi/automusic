@@ -157,11 +157,11 @@
         #endregion
 
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.NumericUpDown Hour;
-        private System.Windows.Forms.NumericUpDown Minute;
-        private System.Windows.Forms.NumericUpDown Second;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button Sync;
         private System.Windows.Forms.Button Cancel;
+        public System.Windows.Forms.NumericUpDown Hour;
+        public System.Windows.Forms.NumericUpDown Minute;
+        public System.Windows.Forms.NumericUpDown Second;
     }
 }

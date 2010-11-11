@@ -98,6 +98,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Context.cs" />
+    <Compile Include="RuleForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="RuleForm.Designer.cs">
+      <DependentUpon>RuleForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Global.cs" />
     <Compile Include="SingletonList.cs" />
     <Compile Include="ReorderableListView.cs">
@@ -122,6 +128,10 @@
     <Compile Include="Player.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="RuleForm.resx">
+      <DependentUpon>RuleForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
       <SubType>Designer</SubType>
