@@ -929,7 +929,10 @@ namespace AutoMusic
 
         private void mScheduleClear_Click(object sender, EventArgs e)
         {
-
+            if (Tools.Question("This will remove all rules from this schedule. Do you want to continue?", MessageBoxIcon.Exclamation) == DialogResult.No) { return; }
+            Schedule.Active.Clear();
+            UpdateAll();
+            SaveSchedule();
         }
 
         private void Clock_DoubleClick(object sender, EventArgs e)
