@@ -95,6 +95,7 @@ namespace AutoMusic
             }
             Form.Show();
             Form.Activate();
+            Form.WindowState = (Form.WindowState == FormWindowState.Minimized ? FormWindowState.Normal : Form.WindowState);
         }
     }
 }
