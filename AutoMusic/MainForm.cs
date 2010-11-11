@@ -901,12 +901,30 @@ namespace AutoMusic
 
         private void mScheduleDuplicate_Click(object sender, EventArgs e)
         {
-
+            this.DetachUpdateEventHandlers();
+            foreach (ListViewItem Item in ScheduleGrid.SelectedItems)
+            {
+                TimeFrame T = (TimeFrame)Item.Tag;
+                Schedule.Active.Duplicate(T);
+            }
+            UpdateAll();
+            SaveSchedule();
+            ScheduleGrid.SelectedItems.Clear();
+            this.AttachUpdateEventHandlers();
         }
 
         private void mScheduleRemove_Click(object sender, EventArgs e)
         {
-
+            this.DetachUpdateEventHandlers();
+            foreach (ListViewItem Item in ScheduleGrid.SelectedItems)
+            {
+                TimeFrame T = (TimeFrame)Item.Tag;
+                Schedule.Active.Remove(T);
+            }
+            UpdateAll();
+            SaveSchedule();
+            ScheduleGrid.SelectedItems.Clear();
+            this.AttachUpdateEventHandlers();
         }
 
         private void mScheduleClear_Click(object sender, EventArgs e)
