@@ -312,7 +312,7 @@ namespace AutoMusic
             try
             {
                 string Extension = System.IO.Path.GetExtension(File).ToLower().Trim();
-                if (Extension == "amp" || Extension == "m3u")
+                if (Extension == ".amp" || Extension == ".m3u")
                 {
                     Playlist P = Playlist.Load(File);
                     return true;

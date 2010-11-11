@@ -195,14 +195,14 @@ namespace AutoMusic
         }
         public void Initialize()
         {
-            //try
-            //{
+            try
+            {
                 Sound = new Audio(this.File, false);
-            //}
-            //catch
-            //{
-            //    this.StopFinal(StopReason.Error);
-            //}
+            }
+            catch
+            {
+                this.StopFinal(StopReason.Error);
+            }
             this.ResetParameters();
         }
 
