@@ -99,6 +99,7 @@
   <ItemGroup>
     <Compile Include="Context.cs" />
     <Compile Include="Global.cs" />
+    <Compile Include="SingletonList.cs" />
     <Compile Include="ReorderableListView.cs">
       <SubType>Component</SubType>
     </Compile>

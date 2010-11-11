@@ -5,39 +5,32 @@ using System.IO;
 
 namespace AutoMusic
 {
-    class Schedule
+    class Schedule : SingletonList<TimeFrame>
     {
         public delegate void StateChangeDelegate(object sender, EventArgs e);
         public delegate void PlayDelegate(object sender, PlayEventArgs e);
         public delegate void StopDelegate(object sender, StopEventArgs e);
 
-        string _Path;
-        public string Path { get { return this._Path; } }
-        List<TimeFrame> _TimeFrames;
-        public List<TimeFrame> TimeFrames { get { return this._TimeFrames; } }
-
         public Schedule()
+            : base()
         {
-            this._TimeFrames = new List<TimeFrame>();
+
         }
 
-        public void Add(TimeFrame TimeFrame)
+        public override void Add(TimeFrame TimeFrame)
         {
-            if (TimeFrame == null) { throw new ArgumentNullException(); }
-            this.TimeFrames.Add(TimeFrame);
+            base.Add(TimeFrame);
         }
-        public void Remove(TimeFrame TimeFrame)
+        public override void Remove(TimeFrame TimeFrame)
         {
-            if (TimeFrame == null) { throw new ArgumentNullException(); }
-            this.TimeFrames.Remove(TimeFrame);
+            base.Remove(TimeFrame);
         }
         public void Duplicate(TimeFrame TimeFrame)
         {
             this.Add(TimeFrame.Duplicate());
         }
 
-        public void Save() { this.Save(""); }
-        public void Save(string Path)
+        public override void Save(string Path)
         {
             if (Path == "" && this.Path == "") { throw new InvalidOperationException("No path was specified."); }
             if (Path == "") { Path = this.Path; }
@@ -47,12 +40,17 @@ namespace AutoMusic
             this._Path = Path;
         }
 
+        public override void Export(string Path)
+        {
+
+        }
+
         public override string ToString()
         {
-            string P = "";
-            for (int i = 0; i < this.TimeFrames.Count; i++)
+            string P = "AMS\n";
+            for (int i = 0; i < this.Items.Count; i++)
             {
-                P += this.TimeFrames[i].ToString() + "\n";
+                P += this.Items[i].ToString() + "\n";
             }
             return P;
         }
@@ -61,7 +59,7 @@ namespace AutoMusic
         public bool AllowPlayAt(DateTime Time)
         {
             bool Allow = Schedule.Mode == ScheduleMode.WhiteList ? false : true;
-            foreach (TimeFrame Frame in this.TimeFrames)
+            foreach (TimeFrame Frame in this.Items)
             {
                 DateTime From = Frame.From.Date;
                 DateTime To = Frame.To.Date;
@@ -74,7 +72,7 @@ namespace AutoMusic
 
         public void Sort()
         {
-            this.TimeFrames.Sort(new Comparison<TimeFrame>(delegate(TimeFrame T1, TimeFrame T2)
+            this.Items.Sort(new Comparison<TimeFrame>(delegate(TimeFrame T1, TimeFrame T2)
                 {
                     if (T1.From.Date == T2.From.Date)
                     {
@@ -95,7 +93,8 @@ namespace AutoMusic
 
 
         // Static members
-        static public Schedule Active;
+
+        static public new Schedule Active;
 
         static public int StartAfter = 10;
         static public int StopBefore = 10;
@@ -135,15 +134,18 @@ namespace AutoMusic
         static public bool AllowPlay { get { return Active.AllowPlayNow; } }
         static public ScheduleMode Mode = ScheduleMode.WhiteList;
 
-        static public Schedule Load(string File)
+        static public new Schedule Load(string File)
         {
             StreamReader Reader = new StreamReader(File);
             string[] Lines = Reader.ReadToEnd().Split(new string[] { "\n" }, StringSplitOptions.None);
             Schedule S = new Schedule();
             S._Path = File;
-            for (int i = 0; i < Lines.Length; i++)
+            for (int i = 1; i < Lines.Length; i++)
             {
-                try { S.Add(TimeFrame.Parse(Lines[i].Trim(new char[] { '\r' }))); }
+                try
+                {
+                    S.Add(TimeFrame.Parse(Lines[i].Trim(new char[] { '\r' })));
+                }
                 catch { }
             }
             return S;

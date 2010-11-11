@@ -81,17 +81,26 @@ namespace AutoMusic
             UpdatePlaylistGrid();
             UpdateScheduleGrid();
             UpdatePlaylistMenu();
+            UpdateScheduleMenu();
+        }
+        private void SavePlaylist()
+        {
+            if (Playlist.Active.Saved) { Playlist.Active.Save(); }
+        }
+        private void SaveSchedule()
+        {
+            if (Schedule.Active.Saved) { Schedule.Active.Save(); }
         }
         private void UpdatePlaylistGrid()
         {
             if (this.InvokeRequired) { this.Invoke((MethodInvoker)delegate { this.UpdatePlaylistGrid(); }); return; }
-            for (int i = Playlist.Active.Tracks.Count; i < PlaylistGrid.Items.Count; )
+            for (int i = Playlist.Active.Items.Count; i < PlaylistGrid.Items.Count; )
             {
                 PlaylistGrid.Items.RemoveAt(i);
             }
-            for (int i = 0; i < Playlist.Active.Tracks.Count; i++)
+            for (int i = 0; i < Playlist.Active.Items.Count; i++)
             {
-                Track Current = Playlist.Active.Tracks[i];
+                Track Current = Playlist.Active.Items[i];
                 TrackState State = Current.State;
                 string Name = Path.GetFileName(Current.File);
                 int Length = 0;
@@ -134,9 +143,13 @@ namespace AutoMusic
         {
             if (this.InvokeRequired) { this.Invoke((MethodInvoker)delegate { this.UpdateScheduleGrid(); }); return; }
             Schedule.Active.Sort();
-            for (int i = 0; i < Schedule.Active.TimeFrames.Count; i++)
+            for (int i = Schedule.Active.Items.Count; i < ScheduleGrid.Items.Count; )
             {
-                TimeFrame Current = Schedule.Active.TimeFrames[i];
+                ScheduleGrid.Items.RemoveAt(i);
+            }
+            for (int i = 0; i < Schedule.Active.Items.Count; i++)
+            {
+                TimeFrame Current = Schedule.Active.Items[i];
                 string Allow = Current.Exclusion ? "NO" : "YES";
                 string From = Current.From.ToString();
                 string To = Current.To.ToString();
@@ -271,6 +284,45 @@ namespace AutoMusic
                 }
             }
         }
+        private void UpdateScheduleMenu()
+        {
+            if (this.InvokeRequired) { this.Invoke((MethodInvoker)delegate { this.UpdateScheduleMenu(); }); return; }
+            this.mScheduleSave.Enabled = (Schedule.Active.Empty ? false : true);
+            if (!Schedule.Active.Saved)
+            {
+                this.mScheduleCurrent.Text = "Current schedule: Unsaved";
+                this.mScheduleSave.Text = "Save schedule...";
+            }
+            else
+            {
+                this.mScheduleCurrent.Text = "Current schedule: " + Path.GetFileName(Schedule.Active.Path);
+                this.mScheduleSave.Text = "Save a copy...";
+            }
+            if (ScheduleGrid.SelectedItems.Count == 0)
+            {
+                this.mScheduleDuplicate.Enabled = false;
+                this.mScheduleEdit.Enabled = false;
+                this.mScheduleRemove.Enabled = false;
+            }
+            else
+            {
+                this.mScheduleDuplicate.Enabled = true;
+                this.mScheduleRemove.Enabled = true;
+                this.mScheduleEdit.Enabled = (ScheduleGrid.SelectedItems.Count == 1);
+                if (ScheduleGrid.SelectedItems.Count == 1)
+                {
+                    this.mScheduleDuplicate.Text = "Duplicate rule";
+                    this.mScheduleEdit.Text = "Edit rule...";
+                    this.mScheduleRemove.Text = "Remove rule";
+                }
+                else
+                {
+                    this.mScheduleDuplicate.Text = "Duplicate rules";
+                    this.mScheduleEdit.Text = "Edit rules...";
+                    this.mScheduleRemove.Text = "Remove rules";
+                }
+            }
+        }
         private void SetStatus(string Status)
         {
             if (this.InvokeRequired) { this.Invoke((MethodInvoker)delegate { this.SetStatus(Status); }); return; }
@@ -336,11 +388,7 @@ namespace AutoMusic
 
         }
 
-        //NEEDS TO BE REMOVED!!!!
-        private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            Global.Context.ExitThread();
-        }
+
         private void PlaylistGrid_Resize(object sender, EventArgs e)
         {
             PlaylistGrid.Columns[1].Width = PlaylistGrid.ClientSize.Width - PlaylistGrid.Columns[0].Width - PlaylistGrid.Columns[2].Width;
@@ -462,18 +510,19 @@ namespace AutoMusic
         {
             for (int i = 0; i < this.PlaylistGrid.Items.Count; i++)
             {
-                Playlist.Active.Tracks.Remove((Track)this.PlaylistGrid.Items[i].Tag);
-                Playlist.Active.Tracks.Insert(i, (Track)this.PlaylistGrid.Items[i].Tag);
+                Playlist.Active.Items.Remove((Track)this.PlaylistGrid.Items[i].Tag);
+                Playlist.Active.Items.Insert(i, (Track)this.PlaylistGrid.Items[i].Tag);
             }
             this.UpdateAll();
+            this.SavePlaylist();
         }
         private void InfoLoadBW_DoWork(object sender, DoWorkEventArgs e)
         {
             try
             {
-                for (int i = 0; i < Playlist.Active.Tracks.Count; i++)
+                for (int i = 0; i < Playlist.Active.Items.Count; i++)
                 {
-                    Track Current = Playlist.Active.Tracks[i];
+                    Track Current = Playlist.Active.Items[i];
                     if (!Current.InfoAvailable)
                     {
                         try
@@ -505,17 +554,21 @@ namespace AutoMusic
         }
         private void ScrollToCurrentTrack()
         {
-            this.Invoke((MethodInvoker)delegate
+            try
             {
-                foreach (ListViewItem Item in PlaylistGrid.Items)
+                this.Invoke((MethodInvoker)delegate
                 {
-                    Track T = (Track)Item.Tag;
-                    if (Playlist.Active.IsCurrent && Playlist.Active.Current == T && !PlaylistMenu.Visible)
+                    foreach (ListViewItem Item in PlaylistGrid.Items)
                     {
-                        Item.EnsureVisible();
+                        Track T = (Track)Item.Tag;
+                        if (Playlist.Active.IsCurrent && Playlist.Active.Current == T && !PlaylistMenu.Visible)
+                        {
+                            Item.EnsureVisible();
+                        }
                     }
-                }
-            });
+                });
+            }
+            catch { }
         }
         private void AutoMode_MouseEnter(object sender, EventArgs e)
         {
@@ -577,6 +630,7 @@ namespace AutoMusic
             }
             PlaylistGrid.SelectedItems.Clear();
             UpdateAll();
+            this.SavePlaylist();
             this.AttachUpdateEventHandlers();
         }
         private void mPlaylistExclude_Click(object sender, EventArgs e)
@@ -602,6 +656,7 @@ namespace AutoMusic
             }
             PlaylistGrid.SelectedItems.Clear();
             UpdateAll();
+            this.SavePlaylist();
             this.AttachUpdateEventHandlers();
             if (CallNext) { Playlist.Active.Next(); }
         }
@@ -624,6 +679,7 @@ namespace AutoMusic
             }
             PlaylistGrid.SelectedItems.Clear();
             UpdateAll();
+            SavePlaylist();
             this.AttachUpdateEventHandlers();
         }
 
@@ -631,6 +687,7 @@ namespace AutoMusic
         {
             if (!Playlist.Active.Saved && !Playlist.Active.Empty && Tools.Question("Current playlist is not saved. Discard it and create a new one?", MessageBoxIcon.Exclamation) == DialogResult.No) { return; }
             if (Playlist.Active.IsCurrent) { Playlist.Active.Current.Stop(); }
+            SavePlaylist();
             Playlist.Active = new Playlist();
             UpdateAll();
         }
@@ -638,13 +695,15 @@ namespace AutoMusic
         private void mPlaylistLoad_Click(object sender, EventArgs e)
         {
             if (!Playlist.Active.Saved && !Playlist.Active.Empty && Tools.Question("Current playlist is not saved. Discard it and load another one?", MessageBoxIcon.Exclamation) == DialogResult.No) { return; }
-            LoadPlaylistDialog.Title = "Load Playlist";
+            LoadPlaylistDialog.Title = "Load playlist";
             if (LoadPlaylistDialog.ShowDialog() == DialogResult.OK)
             {
                 try
                 {
+                    if (LoadPlaylistDialog.FileName.ToLower() == Playlist.Active.Path.ToLower()) { return; }
                     Playlist NewList = Playlist.Load(LoadPlaylistDialog.FileName);
                     if (Playlist.Active.IsCurrent) { Playlist.Active.Current.Stop(); }
+                    SavePlaylist();
                     Playlist.Active = NewList;
                     UpdateAll();
                 }
@@ -652,7 +711,7 @@ namespace AutoMusic
                 catch { Tools.Message("Could not load " + LoadPlaylistDialog.FileName + ": error opening the file.", MessageBoxIcon.Error); }
             }
         }
-        private void mPlaylistSave_Click(object sender, EventArgs e)
+        public void mPlaylistSave_Click(object sender, EventArgs e)
         {
             SavePlaylistDialog.Title = (Playlist.Active.Saved ? "Save a copy" : "Save playlist");
             if (SavePlaylistDialog.ShowDialog() == DialogResult.OK)
@@ -696,6 +755,7 @@ namespace AutoMusic
                 }
                 Playlist.Active.AddRange(Tracks);
                 UpdateAll();
+                SavePlaylist();
             }
         }
 
@@ -715,6 +775,7 @@ namespace AutoMusic
                     }
                     Playlist.Active.AddRange(Tracks);
                     UpdateAll();
+                    SavePlaylist();
                 }
                 catch { Tools.Message("Could not search for files in " + AddFolderDialog.SelectedPath + ": error opening the folder", MessageBoxIcon.Error); }
             }
@@ -722,14 +783,15 @@ namespace AutoMusic
 
         private void mPlaylistImport_Click(object sender, EventArgs e)
         {
-            LoadPlaylistDialog.Title = "Import Playlist";
+            LoadPlaylistDialog.Title = "Import playlist";
             if (LoadPlaylistDialog.ShowDialog() == DialogResult.OK)
             {
                 try
                 {
                     Playlist NewList = Playlist.Load(LoadPlaylistDialog.FileName);
-                    Playlist.Active.AddRange(NewList.Tracks);
+                    Playlist.Active.Add(NewList);
                     UpdateAll();
+                    this.SavePlaylist();
                 }
                 catch (FormatException) { Tools.Message("Could not load " + LoadPlaylistDialog.FileName + ": the file format cannot be recognized.", MessageBoxIcon.Error); }
                 catch { Tools.Message("Could not load " + LoadPlaylistDialog.FileName + ": error opening the file.", MessageBoxIcon.Error); }
@@ -739,7 +801,7 @@ namespace AutoMusic
         private void mPlaylistReset_Click(object sender, EventArgs e)
         {
             if (Tools.Question("This will re-queue every track in this playlist regardless of its status. Do you want to continue?", MessageBoxIcon.Exclamation) == DialogResult.No) { return; }
-            foreach (Track Track in Playlist.Active.Tracks)
+            foreach (Track Track in Playlist.Active.Items)
             {
                 if (!Track.Running)
                 {
@@ -747,6 +809,7 @@ namespace AutoMusic
                 }
             }
             UpdateAll();
+            SavePlaylist();
         }
 
         private void mPlaylistClear_Click(object sender, EventArgs e)
@@ -755,6 +818,63 @@ namespace AutoMusic
             if (Playlist.Active.IsCurrent) { Playlist.Active.Current.Stop(); }
             Playlist.Active.Clear();
             UpdateAll();
+            SavePlaylist();
+        }
+
+        private void mScheduleNew_Click(object sender, EventArgs e)
+        {
+            if (!Schedule.Active.Saved && !Schedule.Active.Empty && Tools.Question("Current schedule is not saved. Discard it and create a new one?", MessageBoxIcon.Exclamation) == DialogResult.No) { return; }
+            //SaveSchedule();
+            Schedule.Active = new Schedule();
+            UpdateAll();
+        }
+
+        private void mScheduleLoad_Click(object sender, EventArgs e)
+        {
+            if (!Schedule.Active.Saved && !Schedule.Active.Empty && Tools.Question("Current schedule is not saved. Discard it and load another one?", MessageBoxIcon.Exclamation) == DialogResult.No) { return; }
+            if (LoadScheduleDialog.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    if (LoadScheduleDialog.FileName.ToLower() == Schedule.Active.Path.ToLower()) { return; }
+                    Schedule NewList = Schedule.Load(LoadScheduleDialog.FileName);
+                    SaveSchedule();
+                    Schedule.Active = NewList;
+                    UpdateAll();
+                }
+                catch (FormatException) { Tools.Message("Could not load " + LoadScheduleDialog.FileName + ": the file format cannot be recognized.", MessageBoxIcon.Error); }
+                catch { Tools.Message("Could not load " + LoadScheduleDialog.FileName + ": error opening the file.", MessageBoxIcon.Error); }
+            }
+        }
+
+        private void mScheduleSave_Click(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void mScheduleAdd_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void mScheduleEdit_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void mScheduleDuplicate_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void mScheduleRemove_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void mScheduleClear_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

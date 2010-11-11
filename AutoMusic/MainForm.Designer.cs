@@ -90,6 +90,8 @@
             this.SavePlaylistDialog = new System.Windows.Forms.SaveFileDialog();
             this.AddFilesDialog = new System.Windows.Forms.OpenFileDialog();
             this.AddFolderDialog = new System.Windows.Forms.FolderBrowserDialog();
+            this.LoadScheduleDialog = new System.Windows.Forms.OpenFileDialog();
+            this.SaveScheduleDialog = new System.Windows.Forms.SaveFileDialog();
             this.PlaylistGrid = new AutoMusic.ReorderableListView();
             this.Played = new System.Windows.Forms.ColumnHeader();
             this.Title = new System.Windows.Forms.ColumnHeader();
@@ -123,7 +125,7 @@
             this.mPlaylistClear});
             this.PlaylistMenu.Name = "PlaylistGridMenu";
             this.PlaylistMenu.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            this.PlaylistMenu.Size = new System.Drawing.Size(197, 342);
+            this.PlaylistMenu.Size = new System.Drawing.Size(197, 320);
             // 
             // mPlaylistSelectedTracks
             // 
@@ -258,6 +260,7 @@
             this.mScheduleRemove.ShortcutKeys = System.Windows.Forms.Keys.Delete;
             this.mScheduleRemove.Size = new System.Drawing.Size(232, 22);
             this.mScheduleRemove.Text = "Remove rule";
+            this.mScheduleRemove.Click += new System.EventHandler(this.mScheduleRemove_Click);
             // 
             // ScheduleGrid
             // 
@@ -315,14 +318,14 @@
             this.mScheduleClear});
             this.ScheduleMenu.Name = "PlaylistGridMenu";
             this.ScheduleMenu.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            this.ScheduleMenu.Size = new System.Drawing.Size(233, 220);
+            this.ScheduleMenu.Size = new System.Drawing.Size(206, 220);
             // 
             // mScheduleCurrent
             // 
             this.mScheduleCurrent.Enabled = false;
             this.mScheduleCurrent.Name = "mScheduleCurrent";
-            this.mScheduleCurrent.Size = new System.Drawing.Size(232, 22);
-            this.mScheduleCurrent.Text = "E:\\AutoMusic\\Rules\\suli.schedule";
+            this.mScheduleCurrent.Size = new System.Drawing.Size(205, 22);
+            this.mScheduleCurrent.Text = "Current schedule: Unsaved";
             // 
             // sSchedule1
             // 
@@ -335,6 +338,7 @@
             this.mScheduleNew.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
             this.mScheduleNew.Size = new System.Drawing.Size(232, 22);
             this.mScheduleNew.Text = "New schedule";
+            this.mScheduleNew.Click += new System.EventHandler(this.mScheduleNew_Click);
             // 
             // mScheduleLoad
             // 
@@ -342,6 +346,7 @@
             this.mScheduleLoad.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
             this.mScheduleLoad.Size = new System.Drawing.Size(232, 22);
             this.mScheduleLoad.Text = "Load schedule...";
+            this.mScheduleLoad.Click += new System.EventHandler(this.mScheduleLoad_Click);
             // 
             // mScheduleSave
             // 
@@ -349,6 +354,7 @@
             this.mScheduleSave.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
             this.mScheduleSave.Size = new System.Drawing.Size(232, 22);
             this.mScheduleSave.Text = "Save a copy...";
+            this.mScheduleSave.Click += new System.EventHandler(this.mScheduleSave_Click);
             // 
             // sSchedule2
             // 
@@ -361,6 +367,7 @@
             this.mScheduleAdd.ShortcutKeyDisplayString = "Plus";
             this.mScheduleAdd.Size = new System.Drawing.Size(232, 22);
             this.mScheduleAdd.Text = "Add rule...";
+            this.mScheduleAdd.Click += new System.EventHandler(this.mScheduleAdd_Click);
             // 
             // mScheduleEdit
             // 
@@ -368,6 +375,7 @@
             this.mScheduleEdit.ShortcutKeyDisplayString = "Enter";
             this.mScheduleEdit.Size = new System.Drawing.Size(232, 22);
             this.mScheduleEdit.Text = "Edit rule...";
+            this.mScheduleEdit.Click += new System.EventHandler(this.mScheduleEdit_Click);
             // 
             // mScheduleDuplicate
             // 
@@ -375,6 +383,7 @@
             this.mScheduleDuplicate.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.D)));
             this.mScheduleDuplicate.Size = new System.Drawing.Size(232, 22);
             this.mScheduleDuplicate.Text = "Duplicate rule";
+            this.mScheduleDuplicate.Click += new System.EventHandler(this.mScheduleDuplicate_Click);
             // 
             // sSchedule3
             // 
@@ -387,6 +396,7 @@
             this.mScheduleClear.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Shift | System.Windows.Forms.Keys.Delete)));
             this.mScheduleClear.Size = new System.Drawing.Size(232, 22);
             this.mScheduleClear.Text = "Clear list";
+            this.mScheduleClear.Click += new System.EventHandler(this.mScheduleClear_Click);
             // 
             // TopBar
             // 
@@ -682,6 +692,18 @@
                 " its subfolders will be added.";
             this.AddFolderDialog.ShowNewFolderButton = false;
             // 
+            // LoadScheduleDialog
+            // 
+            this.LoadScheduleDialog.DefaultExt = "ams";
+            this.LoadScheduleDialog.Filter = "AutoMusic schedule files|*.ams|All files|*.*";
+            this.LoadScheduleDialog.Title = "Load schedule";
+            // 
+            // SaveScheduleDialog
+            // 
+            this.SaveScheduleDialog.DefaultExt = "ams";
+            this.SaveScheduleDialog.Filter = "AutoMusic schedule|*.ams|All files|*.*";
+            this.SaveScheduleDialog.Title = "Save schedule";
+            // 
             // PlaylistGrid
             // 
             this.PlaylistGrid.AllowDrop = true;
@@ -746,7 +768,6 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "AutoMusic Control Panel";
             this.Load += new System.EventHandler(this.MainForm_Load);
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
             this.Resize += new System.EventHandler(this.MainForm_Resize);
             this.PlaylistMenu.ResumeLayout(false);
             this.ScheduleMenu.ResumeLayout(false);
@@ -823,6 +844,8 @@
         private System.Windows.Forms.SaveFileDialog SavePlaylistDialog;
         private System.Windows.Forms.OpenFileDialog AddFilesDialog;
         private System.Windows.Forms.FolderBrowserDialog AddFolderDialog;
+        private System.Windows.Forms.OpenFileDialog LoadScheduleDialog;
+        private System.Windows.Forms.SaveFileDialog SaveScheduleDialog;
 
     }
 }

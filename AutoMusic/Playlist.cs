@@ -4,7 +4,7 @@ using System.IO;
 
 namespace AutoMusic
 {
-    public class Playlist
+    public class Playlist : SingletonList<Track>
     {
         public delegate void CurrentChangeDelegate(object sender, EventArgs e);
         public delegate void FinishDelegate(object sender, EventArgs e);
@@ -28,7 +28,6 @@ namespace AutoMusic
         public event ErrorDelegate Error = delegate { };
         public event StateChangeDelegate StateChanged = delegate { };
 
-        string _Path = "";
         int _Volume = 1000;
         public int Volume
         {
@@ -52,9 +51,6 @@ namespace AutoMusic
                 if (this.IsCurrent) { this.Current.Pan = value; }
             }
         }
-        public string Path { get { return this._Path; } }
-        List<Track> _Tracks;
-        public List<Track> Tracks { get { return this._Tracks; } }
         Track _Current = null;
         public Track Current
         {
@@ -69,9 +65,9 @@ namespace AutoMusic
         {
             get
             {
-                for (int i = 0; i < this.Tracks.Count; i++)
+                for (int i = 0; i < this.Items.Count; i++)
                 {
-                    if (this.Tracks[i].State == TrackState.Queued) { return this.Tracks[i]; }
+                    if (this.Items[i].State == TrackState.Queued) { return this.Items[i]; }
                 }
                 return null;
             }
@@ -82,26 +78,32 @@ namespace AutoMusic
         {
             get
             {
-                foreach (Track Track in this.Tracks)
+                foreach (Track Track in this.Items)
                 {
                     if (Track.Playing) { return true; }
                 }
                 return false;
             }
         }
-        public bool Saved { get { return (this.Path != ""); } }
-        public bool Empty { get { return (this.Tracks.Count == 0); } }
         public PlaylistFormat Format { get { return this._Format; } }
 
         public Playlist()
         {
-            this._Tracks = new List<Track>();
             this.Volume = Global.Volume;
+            this.StateChanged += new StateChangeDelegate(Playlist_StateChanged);
+        }
+
+        void Playlist_StateChanged(object sender, EventArgs e)
+        {
+            if (this.Saved)
+            {
+                this.Save();
+            }
         }
 
         public void Play()
         {
-            if (this.IsCurrent) 
+            if (this.IsCurrent)
             {
                 if (this.Current.Paused) { this.Current.Resume(); }
                 return;
@@ -123,46 +125,29 @@ namespace AutoMusic
             this.Current.Next();
         }
 
-        public void Add(Track Track)
+        public override void Add(Track Track)
         {
-            if (Track == null) { throw new ArgumentNullException(); }
+            base.Add(Track);
             this.AttachEventHandlers(Track);
-            this.Tracks.Add(Track);
         }
-        public void Add(Playlist Playlist)
+        public override void Insert(int Index, Track Track)
         {
-            if (Playlist == null) { throw new ArgumentNullException(); }
-            this.AddRange(Playlist.Tracks);
-        }
-        public void AddRange(List<Track> Tracks)
-        {
-            for (int i = 0; i < Tracks.Count; i++) { this.Add(Tracks[i]); }
-        }
-        public void Insert(int Index, Track Track)
-        {
-            if (Track == null) { throw new ArgumentNullException(); }
+            base.Insert(Index, Track);
             this.AttachEventHandlers(Track);
-            this.Tracks.Insert(Index, Track);
         }
-        public void InsertRange(int Index, List<Track> Tracks)
+        public override void InsertRange(int Index, List<Track> Tracks)
         {
+            base.InsertRange(Index, Tracks);
             foreach (Track T in Tracks) { this.AttachEventHandlers(T); }
-            this.Tracks.InsertRange(Index, Tracks);
         }
-        public void Remove(Track Track)
+        public override void Remove(Track Track)
         {
-            if (Track == null) { throw new ArgumentNullException(); }
+            base.Remove(Track);
             this.DetachEventHandlers(Track);
-            this.Tracks.Remove(Track);
         }
-        public void Clear()
+        public override void Clear()
         {
-            List<Track> Tracks = new List<Track>();
-            Tracks.AddRange(this._Tracks);
-            foreach (Track Track in Tracks)
-            {
-                this.Remove(Track);
-            }
+            base.Clear();
             this.Current = null;
         }
         public void Duplicate(Track Track)
@@ -171,17 +156,11 @@ namespace AutoMusic
         }
         public void Reset()
         {
-            for (int i = 0; i < this.Tracks.Count; i++)
+            for (int i = 0; i < this.Items.Count; i++)
             {
-                this.Tracks[i].Reset();
+                this.Items[i].Reset();
             }
             this.Current = null;
-        }
-        public void Move(Track Track, int Position)
-        {
-            if (Track == null) { throw new ArgumentNullException(); }
-            this.Tracks.Remove(Track);
-            this.Tracks.Insert(Position, Track);
         }
         void AttachEventHandlers(Track Track)
         {
@@ -234,7 +213,7 @@ namespace AutoMusic
             this.StateChanged(sender, e);
         }
 
-        public void Save() { this.Save(this.Path, this.Format); }
+        public override void Save() { this.Save(this.Path, this.Format); }
         public void Save(string Path, PlaylistFormat Format)
         {
             this.Export(Path, Format);
@@ -242,6 +221,10 @@ namespace AutoMusic
             this._Format = Format;
         }
 
+        public override void Export(string Path)
+        {
+            this.Export(Path, this.Format);
+        }
         public void Export(string Path, PlaylistFormat Format)
         {
             if (Path == "") { throw new InvalidOperationException("No path was specified."); }
@@ -259,16 +242,16 @@ namespace AutoMusic
                     throw new ArgumentException("A format must be specified.");
                 case PlaylistFormat.Internal:
                     string P = "AMP\n";
-                    for (int i = 0; i < this.Tracks.Count; i++)
+                    for (int i = 0; i < this.Items.Count; i++)
                     {
-                        P += this.Tracks[i].ToString(PlaylistFormat.Internal) + "\n";
+                        P += this.Items[i].ToString(PlaylistFormat.Internal) + "\n";
                     }
                     return P;
                 case PlaylistFormat.M3U:
                     string Q = "#EXTM3U\n";
-                    for (int i = 0; i < this.Tracks.Count; i++)
+                    for (int i = 0; i < this.Items.Count; i++)
                     {
-                        Q += this.Tracks[i].ToString(PlaylistFormat.M3U) + "\n";
+                        Q += this.Items[i].ToString(PlaylistFormat.M3U) + "\n";
                     }
                     return Q;
             }
@@ -277,9 +260,9 @@ namespace AutoMusic
 
         // Static members
 
-        static public Playlist Active;
+        static public new Playlist Active;
 
-        static public Playlist Load(string File) { return Playlist.Load(File, PlaylistFormat.Auto); }
+        static public new Playlist Load(string File) { return Playlist.Load(File, PlaylistFormat.Auto); }
         static public Playlist Load(string File, PlaylistFormat Format)
         {
             Directory.SetCurrentDirectory(System.IO.Path.GetDirectoryName(File));
@@ -323,7 +306,7 @@ namespace AutoMusic
             throw new FormatException("The specified playlist format is invalid.");
         }
 
-        static public bool IsPlaylist(string File)
+        static public new bool IsValid(string File)
         {
             try
             {
@@ -338,10 +321,10 @@ namespace AutoMusic
             catch { return false; }
         }
 
-        static public List<Track> GetTracks(string File)
+        static public new List<Track> GetItems(string File)
         {
             Playlist P = Playlist.Load(File);
-            return P.Tracks;
+            return P.Items;
         }
     }
 }

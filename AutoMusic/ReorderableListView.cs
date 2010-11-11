@@ -61,9 +61,9 @@ namespace AutoMusic
                 {
                     try
                     {
-                        if (Playlist.IsPlaylist(files[i])) 
+                        if (Playlist.IsValid(files[i])) 
                         {
-                            tracks.AddRange(Playlist.GetTracks(files[i]));
+                            tracks.AddRange(Playlist.GetItems(files[i]));
                             continue;
                         }
                     }
