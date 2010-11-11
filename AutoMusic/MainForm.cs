@@ -824,7 +824,7 @@ namespace AutoMusic
         private void mScheduleNew_Click(object sender, EventArgs e)
         {
             if (!Schedule.Active.Saved && !Schedule.Active.Empty && Tools.Question("Current schedule is not saved. Discard it and create a new one?", MessageBoxIcon.Exclamation) == DialogResult.No) { return; }
-            //SaveSchedule();
+            SaveSchedule();
             Schedule.Active = new Schedule();
             UpdateAll();
         }
@@ -849,7 +849,24 @@ namespace AutoMusic
 
         private void mScheduleSave_Click(object sender, EventArgs e)
         {
-            
+            SaveScheduleDialog.Title = (Schedule.Active.Saved ? "Save a copy" : "Save schedule");
+            if (SaveScheduleDialog.ShowDialog() == DialogResult.OK)
+            {
+                string File = SaveScheduleDialog.FileName;
+                if (Schedule.Active.Saved && Path.GetFullPath(Schedule.Active.Path).ToLower() == Path.GetFullPath(File).ToLower())
+                {
+                    Tools.Message("You cannot save the schedule over itself. Please choose another name or location!", MessageBoxIcon.Error);
+                    this.mScheduleSave_Click(sender, e);
+                    return;
+                }
+                try
+                {
+                    if (!Schedule.Active.Saved) { Schedule.Active.Save(SaveScheduleDialog.FileName); }
+                    else { Schedule.Active.Export(SaveScheduleDialog.FileName); }
+                    UpdateAll();
+                }
+                catch { Tools.Message("Could not save schedule. Check that you have permission to save to the selected location!", MessageBoxIcon.Error); }
+            }
         }
 
         private void mScheduleAdd_Click(object sender, EventArgs e)
@@ -875,6 +892,28 @@ namespace AutoMusic
         private void mScheduleClear_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void Clock_DoubleClick(object sender, EventArgs e)
+        {
+            SyncForm Form = new SyncForm();
+            if (Form.ShowDialog() == DialogResult.OK)
+            {
+                DateTime Now = new DateTime(Time.Corrected.Year, Time.Corrected.Month, Time.Corrected.Day, (int)((NumericUpDown)Form.Controls["Hour"]).Value, (int)((NumericUpDown)Form.Controls["Minute"]).Value, (int)((NumericUpDown)Form.Controls["Second"]).Value);
+                Time.CorrectTo(Now);
+                if (Time.TimeOffset == 0)
+                {
+                    Tools.Message("The external time source shows the same time as this computer's clock. No adjustment was neccessary.", MessageBoxIcon.Information);
+                }
+                if (Time.TimeOffset >0)
+                {
+                    Tools.Message("The clock on this computer is " + Time.TimeOffset.ToString() + " seconds late, but AutoMusic has now adjusted its clock to be on time.", MessageBoxIcon.Information);
+                }
+                if (Time.TimeOffset < 0)
+                {
+                    Tools.Message("The clock on this computer is " + ((-1) * Time.TimeOffset).ToString() + " seconds ahead, but AutoMusic has now adjusted its clock to be on time.", MessageBoxIcon.Information);
+                }
+            }
         }
     }
 }

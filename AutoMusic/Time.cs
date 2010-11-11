@@ -26,7 +26,7 @@ namespace AutoMusic
         }
         public DateTime Date
         {
-            get { return new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, this.Hour, this.Minute, 0); }
+            get { return new DateTime(Time.Corrected.Year, Time.Corrected.Month, Time.Corrected.Day, this.Hour, this.Minute, 0); }
             set { this.Hour = value.Hour; this.Minute = value.Minute; }
         }
 
@@ -56,6 +56,10 @@ namespace AutoMusic
         {
             TimeSpan D = new TimeSpan(0, 0, 0, 0, (int)Milliseconds);
             return D.Minutes.ToString() + ":" + D.Seconds.ToString("00");
+        }
+        static public void CorrectTo(DateTime Time)
+        {
+            TimeOffset = (int)(Time - DateTime.Now).TotalSeconds;
         }
     }
 

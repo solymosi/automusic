@@ -13,9 +13,7 @@ namespace AutoMusic
 
         public Schedule()
             : base()
-        {
-
-        }
+        { }
 
         public override void Add(TimeFrame TimeFrame)
         {
@@ -34,15 +32,16 @@ namespace AutoMusic
         {
             if (Path == "" && this.Path == "") { throw new InvalidOperationException("No path was specified."); }
             if (Path == "") { Path = this.Path; }
-            StreamWriter Writer = new StreamWriter(Path);
-            Writer.Write(this.ToString());
-            Writer.Flush(); Writer.Close();
+            this.Export(Path);
             this._Path = Path;
         }
 
         public override void Export(string Path)
         {
-
+            StreamWriter Writer = new StreamWriter(Path);
+            Writer.Write(this.ToString());
+            Writer.Flush();
+            Writer.Close();
         }
 
         public override string ToString()
@@ -138,6 +137,7 @@ namespace AutoMusic
         {
             StreamReader Reader = new StreamReader(File);
             string[] Lines = Reader.ReadToEnd().Split(new string[] { "\n" }, StringSplitOptions.None);
+            Reader.Close();
             Schedule S = new Schedule();
             S._Path = File;
             for (int i = 1; i < Lines.Length; i++)

@@ -258,7 +258,7 @@
             // 
             this.mScheduleRemove.Name = "mScheduleRemove";
             this.mScheduleRemove.ShortcutKeys = System.Windows.Forms.Keys.Delete;
-            this.mScheduleRemove.Size = new System.Drawing.Size(232, 22);
+            this.mScheduleRemove.Size = new System.Drawing.Size(205, 22);
             this.mScheduleRemove.Text = "Remove rule";
             this.mScheduleRemove.Click += new System.EventHandler(this.mScheduleRemove_Click);
             // 
@@ -330,13 +330,13 @@
             // sSchedule1
             // 
             this.sSchedule1.Name = "sSchedule1";
-            this.sSchedule1.Size = new System.Drawing.Size(229, 6);
+            this.sSchedule1.Size = new System.Drawing.Size(202, 6);
             // 
             // mScheduleNew
             // 
             this.mScheduleNew.Name = "mScheduleNew";
             this.mScheduleNew.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
-            this.mScheduleNew.Size = new System.Drawing.Size(232, 22);
+            this.mScheduleNew.Size = new System.Drawing.Size(205, 22);
             this.mScheduleNew.Text = "New schedule";
             this.mScheduleNew.Click += new System.EventHandler(this.mScheduleNew_Click);
             // 
@@ -344,7 +344,7 @@
             // 
             this.mScheduleLoad.Name = "mScheduleLoad";
             this.mScheduleLoad.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.mScheduleLoad.Size = new System.Drawing.Size(232, 22);
+            this.mScheduleLoad.Size = new System.Drawing.Size(205, 22);
             this.mScheduleLoad.Text = "Load schedule...";
             this.mScheduleLoad.Click += new System.EventHandler(this.mScheduleLoad_Click);
             // 
@@ -352,20 +352,20 @@
             // 
             this.mScheduleSave.Name = "mScheduleSave";
             this.mScheduleSave.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.mScheduleSave.Size = new System.Drawing.Size(232, 22);
+            this.mScheduleSave.Size = new System.Drawing.Size(205, 22);
             this.mScheduleSave.Text = "Save a copy...";
             this.mScheduleSave.Click += new System.EventHandler(this.mScheduleSave_Click);
             // 
             // sSchedule2
             // 
             this.sSchedule2.Name = "sSchedule2";
-            this.sSchedule2.Size = new System.Drawing.Size(229, 6);
+            this.sSchedule2.Size = new System.Drawing.Size(202, 6);
             // 
             // mScheduleAdd
             // 
             this.mScheduleAdd.Name = "mScheduleAdd";
             this.mScheduleAdd.ShortcutKeyDisplayString = "Plus";
-            this.mScheduleAdd.Size = new System.Drawing.Size(232, 22);
+            this.mScheduleAdd.Size = new System.Drawing.Size(205, 22);
             this.mScheduleAdd.Text = "Add rule...";
             this.mScheduleAdd.Click += new System.EventHandler(this.mScheduleAdd_Click);
             // 
@@ -373,7 +373,7 @@
             // 
             this.mScheduleEdit.Name = "mScheduleEdit";
             this.mScheduleEdit.ShortcutKeyDisplayString = "Enter";
-            this.mScheduleEdit.Size = new System.Drawing.Size(232, 22);
+            this.mScheduleEdit.Size = new System.Drawing.Size(205, 22);
             this.mScheduleEdit.Text = "Edit rule...";
             this.mScheduleEdit.Click += new System.EventHandler(this.mScheduleEdit_Click);
             // 
@@ -381,20 +381,20 @@
             // 
             this.mScheduleDuplicate.Name = "mScheduleDuplicate";
             this.mScheduleDuplicate.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.D)));
-            this.mScheduleDuplicate.Size = new System.Drawing.Size(232, 22);
+            this.mScheduleDuplicate.Size = new System.Drawing.Size(205, 22);
             this.mScheduleDuplicate.Text = "Duplicate rule";
             this.mScheduleDuplicate.Click += new System.EventHandler(this.mScheduleDuplicate_Click);
             // 
             // sSchedule3
             // 
             this.sSchedule3.Name = "sSchedule3";
-            this.sSchedule3.Size = new System.Drawing.Size(229, 6);
+            this.sSchedule3.Size = new System.Drawing.Size(202, 6);
             // 
             // mScheduleClear
             // 
             this.mScheduleClear.Name = "mScheduleClear";
             this.mScheduleClear.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Shift | System.Windows.Forms.Keys.Delete)));
-            this.mScheduleClear.Size = new System.Drawing.Size(232, 22);
+            this.mScheduleClear.Size = new System.Drawing.Size(205, 22);
             this.mScheduleClear.Text = "Clear list";
             this.mScheduleClear.Click += new System.EventHandler(this.mScheduleClear_Click);
             // 
@@ -611,6 +611,7 @@
             this.Clock.TabIndex = 19;
             this.Clock.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.Clock.MouseLeave += new System.EventHandler(this.Clock_MouseLeave);
+            this.Clock.DoubleClick += new System.EventHandler(this.Clock_DoubleClick);
             this.Clock.MouseEnter += new System.EventHandler(this.Clock_MouseEnter);
             // 
             // Upcoming

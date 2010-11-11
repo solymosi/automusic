@@ -268,6 +268,7 @@ namespace AutoMusic
             Directory.SetCurrentDirectory(System.IO.Path.GetDirectoryName(File));
             StreamReader Reader = new StreamReader(File);
             string[] Lines = Reader.ReadToEnd().Split(new string[] { "\n" }, StringSplitOptions.None);
+            Reader.Close();
             switch (Format)
             {
                 case PlaylistFormat.Auto:

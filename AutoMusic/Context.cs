@@ -66,6 +66,8 @@ namespace AutoMusic
             catch { }
             try { Tools.SetRegistry("Volume", Global.Volume.ToString()); }
             catch { }
+            try { Tools.SetRegistry("TimeOffset", Time.TimeOffset.ToString()); }
+            catch { }
         }
 
         public void InitializeSession()
@@ -78,6 +80,8 @@ namespace AutoMusic
             catch { }
             try { Global.Volume = int.Parse(Tools.GetRegistry("Volume", "500")); }
             catch { Global.Volume = 1000; }
+            try { Time.TimeOffset = int.Parse(Tools.GetRegistry("TimeOffset", "0")); }
+            catch { Time.TimeOffset = 0; }
         }
 
         public void ShowForm()
